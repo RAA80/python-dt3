@@ -21,16 +21,16 @@ if __name__ == "__main__":
                                    timeout=0.1,
                                    retry_on_empty=True)
     dt = Client(transport=transport, device=DT340, unit=1)
-    print (dt)
+    print(dt)
 
     # Названия параметров соответствуют названиям на индикаторе прибора,
     # кроме начинающихся с подчеркивания
 
     for name in sorted(DT340.keys()):
         value = dt.getParam(name)
-        print ("{:4s} = {}".format(name, value))
+        print("{:4s} = {}".format(name, value))
         sleep(0.1)
 
         result = dt.setParam(name, value)
-        print ("{:4s} = {}".format(name, result))
+        print("{:4s} = {}".format(name, result))
         sleep(0.1)

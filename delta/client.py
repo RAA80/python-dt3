@@ -28,16 +28,16 @@ class Client(object):
             self._socket.close()
 
     def __repr__(self):
-        return ("Client(transport={}, unit={})".format(self._socket, self.unit))
+        return "Client(transport={}, unit={})".format(self._socket, self.unit)
 
-    def _errorCheck(self, name, retcode):
+    def _error_check(self, name, retcode):
         if not retcode:         # for python2 and pymodbus v1.3.0
-            _logger.error("Unit {} called '{}' with error: "
+            _logger.error("Unit %d called '%s' with error: "
                           "Modbus Error: [Input/Output] No Response received "
-                          "from the remote unit".format(self.unit, name))
+                          "from the remote unit", self.unit, name)
         elif isinstance(retcode, (ModbusException, ExceptionResponse)):
-            _logger.error("Unit {} called '{}' with error: {}".
-                            format(self.unit, name, retcode))
+            _logger.error("Unit %d called '%s' with error: %s",
+                           self.unit, name, retcode)
         else:
             return True
 
@@ -45,12 +45,12 @@ class Client(object):
         ''' Чтение значения параметра по заданному имени '''
 
         name = name.upper()
-        self._dev = self.device[name]
+        _dev = self.device[name]
 
-        result = self._socket.read_holding_registers(address=self._dev['address'],
+        result = self._socket.read_holding_registers(address=_dev['address'],
                                                      count=1,
                                                      unit=self.unit)
-        if self._errorCheck(name, result):
+        if self._error_check(name, result):
             if int(version.short()[0]) > 1:
                 decoder = BinaryPayloadDecoder.fromRegisters(registers=result.registers,
                                                              byteorder=Endian.Big,
@@ -58,22 +58,22 @@ class Client(object):
             else:
                 decoder = BinaryPayloadDecoder.fromRegisters(registers=result.registers,
                                                              endian=Endian.Big)
-            if self._dev['type'] == "U16":
-                return decoder.decode_16bit_uint() if self._dev['divider'] == 1 \
-                       else decoder.decode_16bit_uint()/self._dev['divider']
-            elif self._dev['type'] == "I16":
-                return decoder.decode_16bit_int() if self._dev['divider'] == 1 \
-                       else decoder.decode_16bit_int()/self._dev['divider']
+            if _dev['type'] == "U16":
+                return decoder.decode_16bit_uint() if _dev['divider'] == 1 \
+                       else decoder.decode_16bit_uint()/_dev['divider']
+            elif _dev['type'] == "I16":
+                return decoder.decode_16bit_int() if _dev['divider'] == 1 \
+                       else decoder.decode_16bit_int()/_dev['divider']
 
     def setParam(self, name, value):
         ''' Запись значения параметра по заданному имени '''
 
         name = name.upper()
-        self._dev = self.device[name]
+        _dev = self.device[name]
 
-        if value < self._dev['min'] or value > self._dev['max']:
+        if value < _dev['min'] or value > _dev['max']:
             raise ValueError("Parameter '{}' out of range ({}, {})".
-                             format(name, self._dev['min'], self._dev['max']))
+                             format(name, _dev['min'], _dev['max']))
 
         if int(version.short()[0]) > 1:
             builder = BinaryPayloadBuilder(byteorder=Endian.Big,
@@ -81,17 +81,15 @@ class Client(object):
         else:
             builder = BinaryPayloadBuilder(endian=Endian.Big)
 
-        value *= self._dev['divider']
-        if self._dev['type'] == "U16":   builder.add_16bit_uint(int(value))
-        elif self._dev['type'] == "I16": builder.add_16bit_int(int(value))
+        value *= _dev['divider']
+        if _dev['type'] == "U16":   builder.add_16bit_uint(int(value))
+        elif _dev['type'] == "I16": builder.add_16bit_int(int(value))
 
-        payload = builder.build()
-
-        result = self._socket.write_registers(address=self._dev['address'],
-                                              values=payload,
+        result = self._socket.write_registers(address=_dev['address'],
+                                              values=builder.build(),
                                               skip_encode=True,
                                               unit=self.unit)
-        return self._errorCheck(name, result)
+        return self._error_check(name, result)
 
 
 __all__ = [ "Client" ]
