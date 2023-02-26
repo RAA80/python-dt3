@@ -4,7 +4,6 @@
 import logging
 from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
 from pymodbus.constants import Endian
-from pymodbus.version import version
 from pymodbus.exceptions import ModbusException
 from pymodbus.pdu import ExceptionResponse
 
@@ -36,8 +35,7 @@ class Client(object):
                           "Modbus Error: [Input/Output] No Response received "
                           "from the remote unit", self.unit, name)
         elif isinstance(retcode, (ModbusException, ExceptionResponse)):
-            _logger.error("Unit %d called '%s' with error: %s",
-                           self.unit, name, retcode)
+            _logger.error("Unit %d called '%s' with error: %s", self.unit, name, retcode)
         else:
             return True
 
@@ -51,13 +49,8 @@ class Client(object):
                                                      count=1,
                                                      unit=self.unit)
         if self._error_check(name, result):
-            if int(version.short()[0]) > 1:
-                decoder = BinaryPayloadDecoder.fromRegisters(registers=result.registers,
-                                                             byteorder=Endian.Big,
-                                                             wordorder=Endian.Big)
-            else:
-                decoder = BinaryPayloadDecoder.fromRegisters(registers=result.registers,
-                                                             endian=Endian.Big)
+            decoder = BinaryPayloadDecoder.fromRegisters(result.registers, Endian.Big)
+
             if _dev['type'] == "U16":
                 return decoder.decode_16bit_uint() if _dev['divider'] == 1 \
                        else decoder.decode_16bit_uint()/_dev['divider']
@@ -72,14 +65,10 @@ class Client(object):
         _dev = self.device[name]
 
         if value < _dev['min'] or value > _dev['max']:
-            raise ValueError("Parameter '{}' out of range ({}, {})".
-                             format(name, _dev['min'], _dev['max']))
+            raise ValueError("Parameter '{}' out of range ({}, {}) value '{}'".
+                             format(name, _dev['min'], _dev['max'], value))
 
-        if int(version.short()[0]) > 1:
-            builder = BinaryPayloadBuilder(byteorder=Endian.Big,
-                                           wordorder=Endian.Big)
-        else:
-            builder = BinaryPayloadBuilder(endian=Endian.Big)
+        builder = BinaryPayloadBuilder(None, Endian.Big)
 
         value *= _dev['divider']
         if _dev['type'] == "U16":   builder.add_16bit_uint(int(value))

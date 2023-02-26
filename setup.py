@@ -5,7 +5,7 @@ from distutils.core import setup
 
 
 setup(name="python-dt3",
-      version='0.2.3',
+      version='0.2.4',
       description='Delta DT3-Series Temperature Controller module',
       url='https://github.com/RAA80/python-dt3',
       author='Ryadno Alexey',
