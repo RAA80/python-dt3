@@ -64,7 +64,7 @@ class Client(object):
         name = name.upper()
         _dev = self.device[name]
 
-        if value < _dev['min'] or value > _dev['max']:
+        if value is None or value < _dev['min'] or value > _dev['max']:
             raise ValueError("Parameter '{}' out of range ({}, {}) value '{}'".
                              format(name, _dev['min'], _dev['max'], value))
 
