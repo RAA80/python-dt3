@@ -29,56 +29,53 @@ class Client(object):
     def __repr__(self):
         return "Client(transport={}, unit={})".format(self._socket, self.unit)
 
-    def _error_check(self, name, retcode):
-        if not retcode:         # for python2 and pymodbus v1.3.0
-            _logger.error("Unit %d called '%s' with error: "
-                          "Modbus Error: [Input/Output] No Response received "
-                          "from the remote unit", self.unit, name)
-        elif isinstance(retcode, (ModbusException, ExceptionResponse)):
-            _logger.error("Unit %d called '%s' with error: %s", self.unit, name, retcode)
+    def _error_check(self, retcode):
+        if isinstance(retcode, (ModbusException, ExceptionResponse, type(None))):
+            _logger.error("Unit %d return %s", self.unit, retcode)
         else:
             return True
 
-    def getParam(self, name):
+    def get_param(self, name):
         ''' Чтение значения параметра по заданному имени '''
 
         name = name.upper()
-        _dev = self.device[name]
+        dev = self.device[name]
 
-        result = self._socket.read_holding_registers(address=_dev['address'],
+        result = self._socket.read_holding_registers(address=dev['address'],
                                                      count=1,
                                                      unit=self.unit)
-        if self._error_check(name, result):
+        if self._error_check(result):
             decoder = BinaryPayloadDecoder.fromRegisters(result.registers, Endian.Big)
 
-            if _dev['type'] == "U16":
-                return decoder.decode_16bit_uint() if _dev['divider'] == 1 \
-                       else decoder.decode_16bit_uint()/_dev['divider']
-            elif _dev['type'] == "I16":
-                return decoder.decode_16bit_int() if _dev['divider'] == 1 \
-                       else decoder.decode_16bit_int()/_dev['divider']
+            if dev['type'] == "U16":
+                return decoder.decode_16bit_uint() if dev['divider'] == 1 \
+                       else decoder.decode_16bit_uint()/dev['divider']
+            elif dev['type'] == "I16":
+                return decoder.decode_16bit_int() if dev['divider'] == 1 \
+                       else decoder.decode_16bit_int()/dev['divider']
 
-    def setParam(self, name, value):
+    def set_param(self, name, value):
         ''' Запись значения параметра по заданному имени '''
 
         name = name.upper()
-        _dev = self.device[name]
+        dev = self.device[name]
 
-        if value is None or value < _dev['min'] or value > _dev['max']:
+        if value is None or value < dev['min'] or value > dev['max']:
             raise ValueError("Parameter '{}' out of range ({}, {}) value '{}'".
-                             format(name, _dev['min'], _dev['max'], value))
+                             format(name, dev['min'], dev['max'], value))
 
         builder = BinaryPayloadBuilder(None, Endian.Big)
 
-        value *= _dev['divider']
-        if _dev['type'] == "U16":   builder.add_16bit_uint(int(value))
-        elif _dev['type'] == "I16": builder.add_16bit_int(int(value))
+        value *= dev['divider']
+        {"U16": lambda value: builder.add_16bit_uint(int(value)),
+         "I16": lambda value: builder.add_16bit_int(int(value))
+        }[dev['type']](value)
 
-        result = self._socket.write_registers(address=_dev['address'],
+        result = self._socket.write_registers(address=dev['address'],
                                               values=builder.build(),
                                               skip_encode=True,
                                               unit=self.unit)
-        return self._error_check(name, result)
+        return self._error_check(result)
 
 
 __all__ = [ "Client" ]
