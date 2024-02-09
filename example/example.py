@@ -18,9 +18,9 @@ if __name__ == "__main__":
     dt = Client(transport=transport, device=DT340, unit=1)
     print(dt)
 
-    name = "SV"     # Остальные названия параметров в файле 'device.py'
+    name = "SV"     # Остальные названия параметров в файле 'delta/device.py'
     value = dt.get_param(name)
-    print("{:4s} = {}".format(name, value))
+    print("{} = {}".format(name, value))
 
     result = dt.set_param(name, value)
-    print("{:4s} = {}".format(name, result))
+    print("{} = {}".format(name, result))
