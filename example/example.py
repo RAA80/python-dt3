@@ -1,26 +1,22 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
+#! /usr/bin/env python3
 
-import logging
-from pymodbus.client.sync import ModbusSerialClient
+"""Пример использования библиотеки."""
 
 from delta.client import Client
 from delta.device import DT340
-
-logging.basicConfig(level=logging.INFO)
-
+from pymodbus.client.sync import ModbusSerialClient
 
 if __name__ == "__main__":
     transport = ModbusSerialClient(method="rtu",    # default 19200-8-N-1
                                    port="COM5",
                                    timeout=0.1,
                                    retry_on_empty=True)
-    dt = Client(transport=transport, device=DT340, unit=1)
-    print(dt)
+    client = Client(transport=transport, device=DT340, unit=1)
+    print(client)
 
-    name = "SV"     # Остальные названия параметров в файле 'delta/device.py'
-    value = dt.get_param(name)
-    print("{} = {}".format(name, value))
+    name = "SV"       # Остальные названия параметров в файле 'device.py'
+    value = client.get_param(name)
+    print(f"{name} = {value}")
 
-    result = dt.set_param(name, value)
-    print("{} = {}".format(name, result))
+    result = client.set_param(name, value)
+    print(f"{name} = {result}")

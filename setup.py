@@ -1,10 +1,9 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
+#! /usr/bin/env python3
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(name="python-dt3",
-      version="0.3.1",
+      version="0.4",
       description="Delta DT3-Series Temperature Controller module",
       url="https://github.com/RAA80/python-dt3",
       author="Alexey Ryadno",
@@ -20,11 +19,7 @@ setup(name="python-dt3",
                    "Operating System :: Microsoft :: Windows",
                    "Operating System :: POSIX :: Linux",
                    "Operating System :: POSIX",
-                   "Programming Language :: Python :: 2",
-                   "Programming Language :: Python :: 2.7",
                    "Programming Language :: Python :: 3",
-                   "Programming Language :: Python :: 3.4",
-                   "Programming Language :: Python :: 3.5",
                    "Programming Language :: Python :: 3.6",
                    "Programming Language :: Python :: 3.7",
                    "Programming Language :: Python :: 3.8",
