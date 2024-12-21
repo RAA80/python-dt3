@@ -9,6 +9,8 @@ from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 from pymodbus.pdu import ModbusResponse
 
+from .device import DELTA_PARAMS, DT3
+
 
 class DeltaError(Exception):
     pass
@@ -17,13 +19,12 @@ class DeltaError(Exception):
 class Client:
     """Класс управления температурным контроллером Delta серии DT3."""
 
-    def __init__(self, transport: ModbusSerialClient, device: dict, unit: int) -> None:
+    def __init__(self, transport: ModbusSerialClient, unit: int) -> None:
         """Инициализация класса клиента с указанными параметрами."""
 
         self.socket = transport
         self.socket.connect()
 
-        self.device = device
         self.unit = unit
 
     def __del__(self) -> None:
@@ -35,7 +36,7 @@ class Client:
     def __repr__(self) -> str:
         """Строковое представление объекта."""
 
-        return f"{type(self).__name__}(socket={self.socket}, unit={self.unit})"
+        return f"{type(self).__name__}(transport={self.socket}, unit={self.unit})"
 
     @staticmethod
     def _check_error(retcode: ModbusResponse) -> bool:
@@ -45,15 +46,16 @@ class Client:
             raise DeltaError(retcode)
         return True
 
-    def _check_name(self, name: str) -> dict:
+    @staticmethod
+    def _check_name(name: str) -> DELTA_PARAMS:
         """Проверка названия параметра."""
 
         name = name.upper()
-        if name not in self.device:
+        if name not in DT3:
             msg = f"Unknown parameter '{name}'"
             raise DeltaError(msg)
 
-        return self.device[name]
+        return DT3[name]
 
     def get_param(self, name: str) -> float:
         """Чтение данных из устройства."""

@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name="python-dt3",
-      version="0.4",
+      version="0.5",
       description="Delta DT3-Series Temperature Controller module",
       url="https://github.com/RAA80/python-dt3",
       author="Alexey Ryadno",
@@ -20,9 +20,9 @@ setup(name="python-dt3",
                    "Operating System :: POSIX :: Linux",
                    "Operating System :: POSIX",
                    "Programming Language :: Python :: 3",
-                   "Programming Language :: Python :: 3.6",
-                   "Programming Language :: Python :: 3.7",
                    "Programming Language :: Python :: 3.8",
                    "Programming Language :: Python :: 3.9",
+                   "Programming Language :: Python :: 3.10",
+                   "Programming Language :: Python :: 3.11",
                   ],
      )

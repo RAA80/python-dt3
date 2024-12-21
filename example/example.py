@@ -3,7 +3,6 @@
 """Пример использования библиотеки."""
 
 from delta.client import Client
-from delta.device import DT340
 from pymodbus.client.sync import ModbusSerialClient
 
 if __name__ == "__main__":
@@ -11,7 +10,7 @@ if __name__ == "__main__":
                                    port="COM5",
                                    timeout=0.1,
                                    retry_on_empty=True)
-    client = Client(transport=transport, device=DT340, unit=1)
+    client = Client(transport=transport, unit=1)
     print(client)
 
     name = "SV"       # Остальные названия параметров в файле 'device.py'
